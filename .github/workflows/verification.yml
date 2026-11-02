@@ -27,18 +27,18 @@ jobs:
       with:
         components: rustfmt, clippy
 
-        # --- Setup Coq Formal Proof Assistant Enclave ---
+            # --- Setup Coq Formal Proof Assistant Enclave ---
     - name: Initialize Coq Verification Engine
       uses: coq-community/docker-coq-action@v1
       with:
         coq_version: '8.18'
         ocaml_version: '4.14-flambda'
-        export: 'OPAMROOT' # Corrected space-separated parameter syntax
+        export: 'OPAMROOT'
         custom_script: |
-          # Install mathematical components toolkit prerequisite
-          opam install -y coq-mathcomp-ssreflect coq-mathcomp-algebra coq-mathcomp-matrix
+          # Install mathematical components toolkit (algebra contains matrix modules)
+          opam install -y coq-mathcomp-ssreflect coq-mathcomp-algebra
           
-          # Execute the localized static proof compilation steps via the Makefile
+          # Execute localized static proof compilation steps
           cd verification/coq
           coqc -Q . HolonomyRuntime JargonFilter.v
           coqc -Q . HolonomyRuntime CapacityBounds.v
