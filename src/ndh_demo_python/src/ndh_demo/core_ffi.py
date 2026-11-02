@@ -7,6 +7,7 @@ class CoreFFIBridge:
     def __init__(self, lib_path: str = None):
         if lib_path is None:
             ext = ".so" if not sys.platform.startswith("win32") else ".dll"
+            # Fallback path checking standard compiled location
             lib_path = os.path.join(
                 os.path.dirname(__file__), 
                 f"../../../ndh_core_rust/target/release/libndh_core_rust{ext}"
@@ -35,6 +36,25 @@ class CoreFFIBridge:
             ctypes.POINTER(ctypes.c_double)
         ]
         self.lib.execute_metric_evolution.restype = ctypes.c_int32
+
+        # Added bindings for the 80D Apex Gradient mapping wrapper
+        self.lib.execute_compute_apex_gradient.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.c_size_t,
+            ctypes.POINTER(ctypes.c_double)
+        ]
+        self.lib.execute_compute_apex_gradient.restype = ctypes.c_int32
+
+        # Added bindings for the 9D Radial Laplacian mapping wrapper
+        self.lib.execute_compute_9d_radial_laplacian.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.c_double,
+            ctypes.POINTER(ctypes.c_double)
+        ]
+        self.lib.execute_compute_9d_radial_laplacian.restype = ctypes.c_int32
 
         # --- Symplectic Engine Bindings ---
         self.lib.create_symplectic_engine.argtypes = []
@@ -85,6 +105,42 @@ class NativeManifoldRuntime:
             raise ValueError("Native execution failed: Invariant array validation bounds error.")
             
         return out_scalar.value
+
+    def compute_apex_gradient(self, gradient_vector: np.ndarray) -> np.ndarray:
+        """Executes Lean-verified coordinate normalization across the 80D manifold."""
+        if gradient_vector.ndim != 1 or gradient_vector.shape != (80,):
+            raise ValueError("Gradient vector must be a flat 1D array of exactly 80 elements.")
+            
+        arr_in = np.ascontiguousarray(gradient_vector, dtype=np.float64)
+        in_ptr = arr_in.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        
+        out_buffer = np.zeros(80, dtype=np.float64)
+        out_ptr = out_buffer.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        
+        status = self.bridge.lib.execute_compute_apex_gradient(
+            self.engine_ptr, in_ptr, len(arr_in), out_ptr
+        )
+        
+        if status == -1:
+            raise RuntimeError("Native execution failed: Null pointer or dimensional constraint violation.")
+        elif status == -2:
+            raise ValueError("Native execution failed: Invariant array validation bounds error.")
+            
+        return out_buffer
+
+    def compute_9d_radial_laplacian(self, r: float, f_prime: float, f_double_prime: float) -> float:
+        """Executes Lean-verified hyperspherical diffusion using a safe epsilon boundary."""
+        out_laplacian = ctypes.c_double(0.0)
+        laplacian_ptr = ctypes.byref(out_laplacian)
+        
+        status = self.bridge.lib.execute_compute_9d_radial_laplacian(
+            self.engine_ptr, r, f_prime, f_double_prime, laplacian_ptr
+        )
+        
+        if status == -1:
+            raise RuntimeError("Native execution failed: Null pointer encountered.")
+            
+        return out_laplacian.value
 
     def __del__(self):
         if hasattr(self, 'engine_ptr') and self.engine_ptr and hasattr(self, 'bridge'):
