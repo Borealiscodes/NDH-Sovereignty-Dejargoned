@@ -1,0 +1,11 @@
+[package]
+name = "ndh_core_rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ndh_core_rust"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Light internal array extensions if needed, otherwise using pure standard arrays for absolute stability
