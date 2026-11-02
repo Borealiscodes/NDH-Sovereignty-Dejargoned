@@ -27,14 +27,13 @@ jobs:
       with:
         components: rustfmt, clippy
 
-    # --- Setup Coq Formal Proof Assistant Enclave ---
+        # --- Setup Coq Formal Proof Assistant Enclave ---
     - name: Initialize Coq Verification Engine
       uses: coq-community/docker-coq-action@v1
       with:
         coq_version: '8.18'
         ocaml_version: '4.14-flambda'
-        export: |
-          OPAMROOT: ~/.opam
+        export: 'OPAMROOT' # Corrected space-separated parameter syntax
         custom_script: |
           # Install mathematical components toolkit prerequisite
           opam install -y coq-mathcomp-ssreflect coq-mathcomp-algebra coq-mathcomp-matrix
@@ -44,6 +43,7 @@ jobs:
           coqc -Q . HolonomyRuntime JargonFilter.v
           coqc -Q . HolonomyRuntime CapacityBounds.v
           coqc -Q . HolonomyRuntime Manifold80Drefined.v
+
 
     # --- Setup Lean 4 Formal Proof Assistant Enclave ---
     - name: Initialize Lean 4 / Elan Interface Environment
