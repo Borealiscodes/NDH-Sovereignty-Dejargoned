@@ -1,4 +1,9 @@
-NDH-Sovereignty-Dejargoned — Open-Source Dual-Layer License with Protective Safeguards
+# NDH-Sovereignty-Dejargoned — Open-Source Dual-Layer Ethical License
+
+This License integrates your continuous 80D Soft Manifold Construction and Operator Algebra with upstream discrete balanced ternary primitives, establishing MIT-compatible attribution and ethical boundaries derived from the Hippocratic License. 
+
+By using, copying, modifying, or distributing this software, you agree to be bound by the copyright permissions, ethical redlines, and technical disclaimers detailed in the full license.
+
 
 ================================================================================
 PART 1: CONTINUOUS MANIFOLD & OPERATOR ALGEBRA LAYER
