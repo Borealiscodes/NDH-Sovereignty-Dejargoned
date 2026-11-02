@@ -1,11 +1,17 @@
 pub mod manifold;
 pub mod typeck;
 pub mod codegen;
+pub mod symplectic;
 
 use manifold::ManifoldEngine80D;
 use typeck::DataPacketValidator;
+use symplectic::SymplecticEngine;
 
-/// Opaque wrapper to manage the Rust engine across runtime environments
+// =========================================================================
+// Manifold Engine FFI Bindings
+// =========================================================================
+
+/// Opaque wrapper to manage the Rust manifold engine across runtime environments
 #[no_mangle]
 pub extern "C" fn create_manifold_engine() -> *mut ManifoldEngine80D {
     Box::into_raw(Box::new(ManifoldEngine80D::new()))
@@ -48,4 +54,58 @@ pub extern "C" fn execute_metric_evolution(
         }
         Err(_) => -2, // Invariant validation failure code
     }
+}
+
+// =========================================================================
+// Symplectic Engine FFI Bindings
+// =========================================================================
+
+/// Allocates a new volume-preserving SymplecticEngine on the heap and returns a raw pointer
+#[no_mangle]
+pub extern "C" fn create_symplectic_engine() -> *mut SymplecticEngine {
+    Box::into_raw(Box::new(SymplecticEngine::new()))
+}
+
+/// Safely drops and reclaims the heap memory allocated for a SymplecticEngine instance
+#[no_mangle]
+pub extern "C" fn free_symplectic_engine(ptr: *mut SymplecticEngine) {
+    if !ptr.is_null() {
+        unsafe {
+            let _ = Box::from_raw(ptr);
+        }
+    }
+}
+
+/// Feeds an 80D state vector through our FFI boundary to partition coordinate pairs
+#[no_mangle]
+pub extern "C" fn load_symplectic_state(engine_ptr: *mut SymplecticEngine, state_ptr: *const f64, len: usize) -> i32 {
+    if engine_ptr.is_null() || state_ptr.is_null() {
+        return -1;
+    }
+
+    let raw_slice = unsafe { std::slice::from_raw_parts(state_ptr, len) };
+    match DataPacketValidator::validate_array_bounds(raw_slice) {
+        Ok(sanitized_array) => {
+            let engine = unsafe { &mut *engine_ptr };
+            engine.load_state(&sanitized_array);
+            0
+        }
+        Err(_) => -2,
+    }
+}
+
+/// Pulls back the processed canonical pairs and exports them out as an unconstrained 80D output block
+#[no_mangle]
+pub extern "C" fn export_symplectic_state(engine_ptr: *const SymplecticEngine, out_ptr: *mut f64, len: usize) -> i32 {
+    if engine_ptr.is_null() || out_ptr.is_null() || len != 80 {
+        return -1;
+    }
+
+    let engine = unsafe { &*engine_ptr };
+    let exported = engine.export_state();
+    
+    unsafe {
+        std::ptr::copy_nonoverlapping(exported.as_ptr(), out_ptr, 80);
+    }
+    0
 }
