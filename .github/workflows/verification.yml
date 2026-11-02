@@ -1,0 +1,75 @@
+name: NDH Sovereign Formal Verification Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository provenance tree
+      uses: actions/checkout@v4
+
+    # --- Setup Python Runtime Environment ---
+    - name: Initialize Python Toolchain Core
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    # --- Setup Native Rust Kernel Compiler ---
+    - name: Initialize Rust Target Component Core
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    # --- Setup Coq Formal Proof Assistant Enclave ---
+    - name: Initialize Coq Verification Engine
+      uses: coq-community/docker-coq-action@v1
+      with:
+        coq_version: '8.18'
+        ocaml_version: '4.14-flambda'
+        export: |
+          OPAMROOT: ~/.opam
+        custom_script: |
+          # Install mathematical components toolkit prerequisite
+          opam install -y coq-mathcomp-ssreflect coq-mathcomp-algebra coq-mathcomp-matrix
+          
+          # Execute the localized static proof compilation steps via the Makefile
+          cd verification/coq
+          coqc -Q . HolonomyRuntime JargonFilter.v
+          coqc -Q . HolonomyRuntime CapacityBounds.v
+          coqc -Q . HolonomyRuntime Manifold80Drefined.v
+
+    # --- Setup Lean 4 Formal Proof Assistant Enclave ---
+    - name: Initialize Lean 4 / Elan Interface Environment
+      run: |
+        curl https://githubusercontent.com -sSf | sh -s -- -y --default-toolchain none
+        echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+    # --- Orchestrate Full Structural Pipeline Loop ---
+    - name: Execute Unified System Environment Bootstrap
+      run: |
+        make env
+
+    - name: Enforce Code Base Formatting Constraints
+      run: |
+        make format
+
+    - name: Verify Lean 4 Dependent Structural Invariants
+      run: |
+        cd verification/lean
+        lake exe cache get || true
+        lake build
+
+    - name: Compile High-Performance Native Core Library (Rust)
+      run: |
+        make build_core
+
+    - name: Execute Numerical and FFI Integration Test Suite
+      run: |
+        make test
