@@ -56,6 +56,53 @@ pub extern "C" fn execute_metric_evolution(
     }
 }
 
+/// Native FFI hook executing Lean-verified apex gradient vector calculations
+#[no_mangle]
+pub extern "C" fn execute_compute_apex_gradient(
+    engine_ptr: *const ManifoldEngine80D,
+    gradient_in_ptr: *const f64,
+    len: usize,
+    vector_out_ptr: *mut f64,
+) -> i32 {
+    if engine_ptr.is_null() || gradient_in_ptr.is_null() || vector_out_ptr.is_null() || len != 80 {
+        return -1;
+    }
+
+    let raw_slice = unsafe { std::slice::from_raw_parts(gradient_in_ptr, len) };
+    match DataPacketValidator::validate_array_bounds(raw_slice) {
+        Ok(sanitized_array) => {
+            let engine = unsafe { &*engine_ptr };
+            let normalized = engine.compute_apex_gradient(&sanitized_array);
+            unsafe {
+                std::ptr::copy_nonoverlapping(normalized.as_ptr(), vector_out_ptr, 80);
+            }
+            0
+        }
+        Err(_) => -2,
+    }
+}
+
+/// Native FFI hook executing Lean-verified 9D radial Laplacian calculations
+#[no_mangle]
+pub extern "C" fn execute_compute_9d_radial_laplacian(
+    engine_ptr: *const ManifoldEngine80D,
+    r: f64,
+    f_prime: f64,
+    f_double_prime: f64,
+    out_laplacian: *mut f64,
+) -> i32 {
+    if engine_ptr.is_null() || out_laplacian.is_null() {
+        return -1;
+    }
+    
+    let engine = unsafe { &*engine_ptr };
+    let result = engine.compute_9d_radial_laplacian(r, f_prime, f_double_prime);
+    unsafe {
+        *out_laplacian = result;
+    }
+    0
+}
+
 // =========================================================================
 // Symplectic Engine FFI Bindings
 // =========================================================================
