@@ -12,18 +12,50 @@ def runtime():
         pytest.skip("Native Rust shared object binary is not compiled. Run 'make' first.")
 
 def test_metric_index_symmetry_invariant(runtime):
-    """Verifies that the metric tensor maintains absolute index symmetry (g_ij == g_ji)."""
-    # Generate a random 80D perturbation vector
+    """Verifies that the metric tensor update steps produce mathematically valid stability traces."""
     np.random.seed(42)
     mock_perturbation = np.random.randn(80) * 2.5
     
     # Execute metric evolution update step via Rust FFI
-    runtime.update_metric(mock_perturbation)
+    trace_scalar = runtime.update_metric(mock_perturbation)
     
-    # Extract the internal metric tensor state from the pointer structure
-    # To verify absolute symmetry, we read back elements directly or pass conflicting paths
-    # The internal Rust engine performs transposition averaging on every update step
-    assert True
+    # Assert that the structural transposition averaging returns a non-zero, finite trace value
+    assert isinstance(trace_scalar, float)
+    assert trace_scalar > 0.0
+    assert not np.isnan(trace_scalar)
+
+def test_9d_radial_laplacian_singularity_isolation(runtime):
+    """Asserts that the 9D radial Laplacian operator safely uses its epsilon boundary near r=0."""
+    # Pass a flat 0.0 radius which traditional un-isolated physics engines would crash on
+    zero_radius_output = runtime.compute_9d_radial_laplacian(r=0.0, f_prime=1.5, f_double_prime=2.0)
+    
+    # Mathematical invariant baseline: 2.0 + (8.0 / 1e-12) * 1.5 = 12000000000002.0
+    expected_baseline = 2.0 + (8.0 / 1e-12) * 1.5
+    
+    assert np.isclose(zero_radius_output, expected_baseline, atol=1e-2)
+    assert not np.isnan(zero_radius_output)
+
+def test_apex_gradient_normalization(runtime):
+    """Validates that the apex gradient calculation enforces strict Euclidean vector scaling."""
+    np.random.seed(123)
+    arbitrary_gradient = np.random.randn(80) * 10.0
+    
+    normalized_vector = runtime.compute_apex_gradient(arbitrary_gradient)
+    
+    # Compute the magnitude of the returned vector state: ||x||
+    vector_magnitude = np.sqrt(np.sum(normalized_vector ** 2))
+    
+    # The output must be a unit vector (norm == 1.0)
+    assert np.isclose(vector_magnitude, 1.0, atol=1e-7)
+
+def test_apex_gradient_underflow_isolation(runtime):
+    """Verifies that vector norms below the EPSILON ceiling smoothly fallback to clean zero vectors."""
+    near_zero_gradient = np.ones(80) * 1e-15
+    
+    fallback_vector = runtime.compute_apex_gradient(near_zero_gradient)
+    
+    # Underflow boundary must map directly to an evaluation state of absolute zero
+    assert np.all(fallback_vector == 0.0)
 
 def test_type_validator_nan_rejection(runtime):
     """Confirms that the native typeck validation layer safely rejects corrupt NaN data packets."""
