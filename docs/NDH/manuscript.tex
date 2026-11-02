@@ -1,0 +1,90 @@
+% =========================================================================
+% NDH-Sovereignty-Dejargoned: Primary Manuscript Wrapper
+% File Path: docs/NDH/manuscript.tex
+% =========================================================================
+
+\documentclass[11pt,fleqn]{article}
+
+% --- Core Packages ---
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% --- Page Layout Geometry ---
+\geometry{
+    a4paper,
+    margin=1in
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% --- Custom Mathematical Command Shortcuts ---
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\eps}{\epsilon}
+
+% --- Hyperref Hyperlink Configurations ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={De-jargoned High-Dimensional Manifolds for Workspace Sovereignty},
+    pdfpagemode=UseNone,
+}
+
+% --- Metadata Configurations ---
+\title{\textbf{De-jargoned High-Dimensional Manifolds for Workspace Sovereignty:\\A Localized Multi-Kernel Pipeline for Cognitive Prosthetic Stability}}
+
+\author{
+    \textbf{Independent Systems Architecture Group} \\
+    \small Technical Baseline Repository: \texttt{NDH-Sovereignty-Dejargoned}
+}
+\date{\small November 2026}
+
+% =========================================================================
+% Document Body Execution
+% =========================================================================
+\begin{document}
+
+\maketitle
+
+% --- Abstract Enclave ---
+\begin{abstract}
+Modern neural embedding frameworks and context-window transformer architectures have transitioned from novelty utilities into vital, externalized cognitive prosthetics. For independent researchers and neurodivergent professionals who leverage non-linear data-processing paths, these systems provide critical memory and reasoning extensions. However, centralized infrastructure models introduce structural vulnerabilities, such as unannounced platform adjustments, mandatory background telemetry tracking, and arbitrary API request throttling. This paper presents \texttt{NDH-Sovereignty-Dejargoned}, a low-compute, multi-language software infrastructure that strips speculative abstractions from high-dimensional manifold models to build a local, branchless workspace recovery environment. By executing formal symbolic verification kernels (Coq, Lean 4) in tandem with optimized local array calculation runtimes (Rust, Python), we mathematically guarantee index symmetry and trace stability bounds. This system ensures human-tool path retention directly from localized version control history, decoupling critical software environments from corporate cloud dependencies.
+\end{abstract}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+% --- Modular Section Inclusions ---
+% Section 1: Introduction, Problem Statement, & Lookup Matrix
+\input{manuscript_core_part_1}
+
+% Section 2: Core Mathematical Formulations & Derivations
+\input{OperatorSpine/math_core}
+
+% Section 3: Multi-Kernel Software System Architecture (Coq, Lean, Rust, Python)
+\input{manuscript_core_part_3}
+
+% Section 4: Empirical Test Verification & Numerical Bounds Analysis
+\input{manuscript_core_part_4}
+
+% Section 5: Discussion & Bibliographic References
+\input{manuscript_core_part_5}
+
+\end{document}
+% =========================================================================
+% End of Master Document Wrapper
+% =========================================================================
