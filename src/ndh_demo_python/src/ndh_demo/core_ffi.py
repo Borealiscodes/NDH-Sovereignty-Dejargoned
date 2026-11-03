@@ -37,7 +37,7 @@ class CoreFFIBridge:
         ]
         self.lib.execute_metric_evolution.restype = ctypes.c_int32
 
-        # Added bindings for the 80D Apex Gradient mapping wrapper
+        # Bindings for the 80D Apex Gradient mapping wrapper
         self.lib.execute_compute_apex_gradient.argtypes = [
             ctypes.c_void_p,
             ctypes.POINTER(ctypes.c_double),
@@ -46,7 +46,7 @@ class CoreFFIBridge:
         ]
         self.lib.execute_compute_apex_gradient.restype = ctypes.c_int32
 
-        # Added bindings for the 9D Radial Laplacian mapping wrapper
+        # Bindings for the 9D Radial Laplacian mapping wrapper
         self.lib.execute_compute_9d_radial_laplacian.argtypes = [
             ctypes.c_void_p,
             ctypes.c_double,
@@ -76,6 +76,21 @@ class CoreFFIBridge:
             ctypes.c_size_t
         ]
         self.lib.export_symplectic_state.restype = ctypes.c_int32
+
+        # --- Origami Core Engine Bindings ---
+        self.lib.native_create_origami_engine.argtypes = []
+        self.lib.native_create_origami_engine.restype = ctypes.c_void_p
+
+        self.lib.native_free_origami_engine.argtypes = [ctypes.c_void_p]
+        self.lib.native_free_origami_engine.restype = None
+
+        self.lib.execute_origami_fold.argtypes = [
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.c_size_t,
+            ctypes.POINTER(ctypes.c_double)
+        ]
+        self.lib.execute_origami_fold.restype = ctypes.c_int32
 
 
 class NativeManifoldRuntime:
@@ -180,3 +195,39 @@ class NativeSymplecticRuntime:
     def __del__(self):
         if hasattr(self, 'engine_ptr') and self.engine_ptr and hasattr(self, 'bridge'):
             self.bridge.lib.free_symplectic_engine(self.engine_ptr)
+
+
+class NativeOrigamiRuntime:
+    def __init__(self, bridge: CoreFFIBridge):
+        self.bridge = bridge
+        self.engine_ptr = bridge.lib.native_create_origami_engine()
+        if not self.engine_ptr:
+            raise MemoryError("Failed to allocate native Rust origami engine instance.")
+
+    def fold_state(self, raw_state: np.ndarray) -> np.ndarray:
+        """Folds continuous state vectors and screens them against the ethical filter."""
+        if raw_state.ndim != 1 or raw_state.shape != (80,):
+            raise ValueError("State vector must be a flat 1D array of exactly 80 elements.")
+            
+        arr_in = np.ascontiguousarray(raw_state, dtype=np.float64)
+        in_ptr = arr_in.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        
+        out_buffer = np.zeros(80, dtype=np.float64)
+        out_ptr = out_buffer.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        
+        status = self.bridge.lib.execute_origami_fold(
+            self.engine_ptr, in_ptr, len(arr_in), out_ptr
+        )
+        
+        if status == -1:
+            raise RuntimeError("Native execution failed: Null pointer variant encountered.")
+        elif status == -2:
+            raise ValueError("Native execution failed: Invariant array validation bounds error.")
+        elif status == -3:
+            raise PermissionError("CRITICAL: Lineage-Axis Moral Clarity Filter (LAMCF) breached. Execution terminated.")
+            
+        return out_buffer
+
+    def __del__(self):
+        if hasattr(self, 'engine_ptr') and self.engine_ptr and hasattr(self, 'bridge'):
+            self.bridge.lib.native_free_origami_engine(self.engine_ptr)
