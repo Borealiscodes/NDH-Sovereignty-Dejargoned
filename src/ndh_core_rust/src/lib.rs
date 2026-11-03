@@ -2,10 +2,12 @@ pub mod manifold;
 pub mod typeck;
 pub mod codegen;
 pub mod symplectic;
+pub mod origami_engine;
 
 use manifold::ManifoldEngine80D;
 use typeck::DataPacketValidator;
 use symplectic::SymplecticEngine;
+use origami_engine::OrigamiFoldingEngine;
 
 // =========================================================================
 // Manifold Engine FFI Bindings
@@ -39,10 +41,8 @@ pub extern "C" fn execute_metric_evolution(
         return -1; // Null pointer guard condition triggered
     }
 
-    // Convert the raw pointer slice safely
     let raw_slice = unsafe { std::slice::from_raw_parts(perturbation_ptr, len) };
 
-    // Run type validation to guard against NaN/Inf values or bounding errors
     match DataPacketValidator::validate_array_bounds(raw_slice) {
         Ok(sanitized_array) => {
             let engine = unsafe { &mut *engine_ptr };
@@ -155,4 +155,57 @@ pub extern "C" fn export_symplectic_state(engine_ptr: *const SymplecticEngine, o
         std::ptr::copy_nonoverlapping(exported.as_ptr(), out_ptr, 80);
     }
     0
+}
+
+// =========================================================================
+// Origami Engine & Multimodal Control FFI Bindings
+// =========================================================================
+
+/// Allocates an OrigamiFoldingEngine instance on the heap
+#[no_mangle]
+pub extern "C" fn native_create_origami_engine() -> *mut OrigamiFoldingEngine {
+    Box::into_raw(Box::new(OrigamiFoldingEngine::new()))
+}
+
+/// Frees an OrigamiFoldingEngine instance safely from memory
+#[no_mangle]
+pub extern "C" fn native_free_origami_engine(ptr: *mut OrigamiFoldingEngine) {
+    if !ptr.is_null() {
+        unsafe {
+            let _ = Box::from_raw(ptr);
+        }
+    }
+}
+
+/// Unified FFI gate processing multimodal array constraints down into stable folds
+#[no_mangle]
+pub extern "C" fn execute_origami_fold(
+    engine_ptr: *mut OrigamiFoldingEngine,
+    raw_state_ptr: *const f64,
+    len: usize,
+    folded_out_ptr: *mut f64,
+) -> i32 {
+    if engine_ptr.is_null() || raw_state_ptr.is_null() || folded_out_ptr.is_null() || len != 80 {
+        return -1;
+    }
+
+    let raw_slice = unsafe { std::slice::from_raw_parts(raw_state_ptr, len) };
+    
+    match DataPacketValidator::validate_array_bounds(raw_slice) {
+        Ok(sanitized_array) => {
+            let engine = unsafe { &*engine_ptr };
+            let folded_state = engine.synthesize_quantum_crease(&sanitized_array);
+            
+            // Intercept through the Lineage-Axis Moral Clarity Filter (LAMCF)
+            if !engine.evaluate_moral_clarity_filter(&folded_state) {
+                return -3; // Ethical boundary violation trigger code
+            }
+
+            unsafe {
+                std::ptr::copy_nonoverlapping(folded_state.as_ptr(), folded_out_ptr, 80);
+            }
+            0
+        }
+        Err(_) => -2,
+    }
 }
