@@ -1,6 +1,6 @@
 # 🏗️ NDH-Sovereignty-Dejargoned
 
-A low-compute, formally verified systems framework implementing the Non-Deterministic Hypergraph (NDH) Constitutional Ontology, designed to secure cognitive tool paths and enforce anti-hallucination guardrails using a hybrid stack of Lean 4, Coq, Rust, and Python [1.12].
+A low-compute, still undergoing formal verification in phases per Roadmap v 2.0 systems framework implementing the Non-Deterministic Hypergraph (NDH) Constitutional Ontology, designed to secure cognitive tool paths and enforce anti-hallucination guardrails using a hybrid stack of Lean 4, Coq, Rust, and Python [1.12].
 
 🏗️ RECONSTRUCTION ACTIVE: SYMPLECTIC MULTI-MODAL ORIGAMI OPERATIONAL 🏗️
 
