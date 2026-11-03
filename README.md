@@ -88,3 +88,13 @@ Alternatively, granular targets can be run via the root `Makefile`:
 * **Ternary Algebra Modules:** Derived from design patterns and balanced ternary structures developed within the 8b Project, Copyright Christopher Chenoweth and Peter Lodri (MIT License) [1.12].
 * **Core Framework License:** Released under an **Open-Source Dual-Layer Ethical License** [1.12]. Part 3 incorporates strict Hippocratic provisions that completely prohibit the repurposing of these geometric primitives for offensive kinetic targeting, weapon swarm coordination, or mass surveillance [1.12].
 * **Theoretical Foundation & Baseline Publication:** Grounded in *De-jargoned High-Dimensional Manifolds for Workspace Sovereignty: A Localized Multi-Kernel Pipeline for Cognitive Prosthetic Stability* (Hedling, B. S., 2026), registered under **Zenodo DOI: 10.5281/zenodo.23897427** [1.12].
+
+* Here is the complete, copy-pasteable addendum for your Zenodo description. It maintains structural alignment with your existing technical registry while adding a candid nod to the realities of local formal verification.
+
+Addendum: Verification Registry Status & Hardware Realities
+
+The ongoing validation pipeline for the sovereign runtime architecture is currently tracking two parallel verification vectors:
+• Ongoing Verification Enclaves: Development remains active within verification/lean/NDH/Crossanalysis.lean to formally eliminate structural representation crowding. Active engineering is focused on fully expanding the capacity_safe_convergence_invariant proof skeleton, explicitly evaluating the supremum over the 80×80 indices to exhaustively satisfy the complete metric space axioms under the Banach contraction mapping principle.
+• The Thermodynamic Reality of Local Proofs: While this architecture successfully bypasses the unsustainable environmental toll of frontier-scale GPU data centers, it has revealed a different kind of environmental hazard: compiling advanced Mathlib4 dependent type structures from scratch natively inside local hardware enclaves is a punishingly intensive process. Trading corporate cloud dependency for absolute workspace sovereignty means occasionally watching your CPU registers hit 100% capacity and heat your workspace, proving that while geometric AI completely preserves the canonical volume form, it has absolutely no mercy on local silicon. Researchers are strictly reminded to pull pre-compiled binary allocation tokens (lake exe cache get) before initiating compilation gates unless they actively intend to use their processing unit as a supplementary space heater.
+
+
