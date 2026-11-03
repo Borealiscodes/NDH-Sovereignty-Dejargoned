@@ -15,10 +15,11 @@ require mathlib from git
 @[default_target]
 lean_lib NDH where
   srcDir := "."
-  -- Explicitly registers all core, stability, symplectic, and manifold validation modules
+  -- Explicitly registers all core types, stability boundaries, and crossanalysis enclaves
   roots := #[
     `NDH.CoreTypes, 
     `NDH.StabilityBounds, 
     `NDH.SymplecticPreservation, 
-    `NDH.ManifoldStability
+    `NDH.ManifoldStability,
+    `NDH.Crossanalysis
   ]
