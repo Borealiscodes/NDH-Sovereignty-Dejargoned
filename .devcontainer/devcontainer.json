@@ -1,0 +1,28 @@
+{
+  "name": "NDH Sovereign Formal Enclave",
+  "image": "://microsoft.com",
+  
+  // Installs the specific compiler toolchains required by the project modules
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "stable"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    }
+  },
+
+  // Automatically sets up Coq and Lean 4 packages on machine initialization
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y coq libcoq-ocaml-dev && curl https://githubusercontent.com -sSf | sh -s -- -y --default-toolchain none && echo 'source $HOME/.elan/env' >> ~/.bashrc",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "ms-python.python",
+        "leanprover.lean4",
+        "coq-community.coq-lsp"
+      ]
+    }
+  }
+}
